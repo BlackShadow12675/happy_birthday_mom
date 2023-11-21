@@ -40,6 +40,12 @@ dependencies:
   lottie: ^2.6.0
   geocoding: ^2.1.1
   http: ^1.1.0
+  intl: ^0.18.0
+  flutter_localization: ^0.1.14
+  firebase_core: ^2.22.0
+  flutter_local_notifications: ^16.1.0
+  google_api_availability: ^5.0.0
+  firebase_analytics: ^10.7.0
 
 dev_dependencies:
   flutter_test:
@@ -65,9 +71,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/
-  #   - images/a_dot_ham.jpeg
+    - assets/day/
+    - assets/night/
 
+  #   - images/a_dot_ham.jpeg
+  generate: true
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

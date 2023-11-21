@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:happy_birthday_mom/presentation/models/weather_models.dart';
+import 'package:happy_birthday_mom/presentation/screens/pronostic_page.dart';
 import 'package:happy_birthday_mom/presentation/services/weather_service.dart';
 import 'package:lottie/lottie.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -18,10 +20,10 @@ class _WeatherPageState extends State<WeatherPage> {
 
   //  fetch weather
   _fetchWeather() async{
-    //  get the current city
+    //  obtener la ubicacion de la ciudad
     String cityName = await _weatherServices.getCurrentCity();
 
-    //  get weather for city
+    //  obtener el tiempo de la ciudad
     try{
       final Weather = await _weatherServices.getWeather(cityName);
       setState(() {
@@ -37,26 +39,34 @@ class _WeatherPageState extends State<WeatherPage> {
 
   //  weather animations
 String getWeatherAnimation(String? mainCondition){
-  if(mainCondition == null) return 'assets/sunny.json'; //default to sunny
+  if(mainCondition == null) return 'assets/day/charging.json'; //default to sunny
+
+        // Obtén la hora actual
+  final hour = DateTime.now().hour;
+
+  // Determina si es de día o de noche
+  final isDayTime = hour > 6 && hour < 19;
 
   switch(mainCondition.toLowerCase()){
     case 'clouds':
+      return isDayTime ? 'assets/day/cloud.json' : 'assets/night/cloud.json';
     case 'mist':
+      return isDayTime ? 'assets/day/cloud.json' : 'assets/night/cloud.json';
     case 'smoke':
+      return isDayTime ? 'assets/day/sunny.json' : 'assets/night/moon.json';
     case 'haze':
+      return isDayTime ? 'assets/day/sunny.json' : 'assets/night/moon.json';
     case 'dust':
+      return isDayTime ? 'assets/day/sunny.json' : 'assets/night/moon.json';
     case 'fog':
-      return 'assets/cloud.json';
+      return isDayTime ? 'assets/day/cloud.json' : 'assets/night/cloud.json';
     case 'rain':
+      return isDayTime ? 'assets/day/rain.json' : 'assets/night/rain.json';
     case 'drizzle':
-    case 'shower rain':
-      return 'assets/rain.json';
-    case 'thunderstorm':
-      return 'assets/thunderstorm.json';
-    case 'clear':
-      return 'assets/sunny.json';
+      return isDayTime ? 'assets/day/rain.json' : 'assets/night/rain.json';
+    // Añade más condiciones climáticas aquí...
     default:
-      return 'assets/sunny.json';
+      return isDayTime ? 'assets/day/sunny.json' : 'assets/night/moon.json';
   }
 }
 
@@ -95,7 +105,7 @@ String getWeatherCondition(String? mainCondition){
   @override
   void initState() {
     super.initState();
-
+    FirebaseMessaging.instance.requestPermission(alert: true, badge: true, sound: true);
     //  fetch weather on startup
     _fetchWeather();
   }
@@ -105,23 +115,40 @@ String getWeatherCondition(String? mainCondition){
     return Scaffold(
       appBar: AppBar(
         // Toda la configuracion del appbar
-        backgroundColor: Colors.blueAccent[200],
+        backgroundColor: Color.fromARGB(255, 214, 144, 212),
+        // texto del appbar
         title: const Text('Buen Viaje Mamá', style: TextStyle(fontSize: 25, fontWeight: FontWeight.w300, color: Colors.white)),
         centerTitle: true,
-        //botones de actions
+        //boton para ir a pantalla de pronostico
         actions: [
           IconButton(
             onPressed: (){
-              _fetchWeather();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PronosticPage()),
+              );
             },
-            icon: const Icon(Icons.replay_outlined), 
+            icon: const Icon(Icons.navigate_next_rounded, color: Colors.black54, size: 30,), 
           ),],
+        //boton de actualizar textos
+        leading: IconButton(
+          onPressed: (){
+            setState(() {
+              _weather = null;
+              _fetchWeather();
+            });
+          },
+          icon: const Icon(Icons.location_on, color: Colors.black54, size: 30,), 
+        ),
       ),
+      //  fondo de la pantalla
       backgroundColor: Colors.lightBlue[100],
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children:[
+            //  texto descriptivo
+            Spacer(),
             const Text('Ciudad:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w300)),
 
             //  nombre de la ciudad
@@ -135,8 +162,17 @@ String getWeatherCondition(String? mainCondition){
 
             //  condicion del clima
             Text(getWeatherCondition(_weather?.mainCondition), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w300)),
+            
             //  descripcion del clima
             Text(_weather?.detalles ?? 'Cargando descripción...', style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w300)),
+
+            const Spacer(),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text("❤️ TQM MAMA Attm: Tus hijos ❤️", style: TextStyle(fontSize: 10, fontWeight: FontWeight.w400),),
+              ],
+            )
           ],
         ),
       ),
